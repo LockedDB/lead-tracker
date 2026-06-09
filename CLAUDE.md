@@ -16,6 +16,10 @@ Idioma del producto y de los comentarios: **español (España)**. El tono de cua
 
 Los leads originales viven como notas markdown en un Obsidian vault **fuera de este repo**. `scripts/import-leads.ts` (comando `npm run import-leads`) los lee y los vuelca en SQLite. Esa relación es **read-only de una sola dirección**: este repo importa del vault, nunca escribe en él. La ruta del vault está hardcodeada en `scripts/import-leads.ts:10` (override con env `LEADS_DIR` si se parametriza en el futuro).
 
+## Acceso a Outlook (correo)
+
+Hay un MCP **`outlook`** (solo lectura) conectado a la cuenta personal del dueño del repo: da acceso a correo, calendario y contactos vía Microsoft Graph. Útil para **alimentar la pipeline de `jobs`** desde los emails de confirmación de candidaturas (buscar, leer asuntos/cuerpos y volcar empresa/rol/estado a la tabla). No escribe correo (no envía ni borra). No metas aquí credenciales ni datos personales: este repo es público.
+
 ## Stack
 
 - **Next.js 16** (App Router, React 19, Server + Client Components). Ojo: Next 16 tiene breaking changes respecto a versiones anteriores — ver `AGENTS.md` y `node_modules/next/dist/docs/`.
