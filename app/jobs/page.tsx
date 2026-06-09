@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Shell } from '@/components/Shell'
 import { EntityTable, type EntityRow } from '@/components/EntityTable'
 import { DetailModal } from '@/components/DetailModal'
@@ -16,11 +16,35 @@ export default function JobsPage() {
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [creating, setCreating] = useState(false)
 
-  async function load() {
+  // Callbacks estables (deps vacías): así las filas memoizadas de la tabla no se
+  // re-renderizan en cada cambio de estado del padre (p. ej. tras un reorder).
+  const reload = useCallback(async () => {
     setJobs(await api.listJobs())
     setLoading(false)
-  }
-  const reload = () => load()
+  }, [])
+
+  // Reordenado optimista: aplicamos el nuevo orden en local al instante (reutilizando
+  // los mismos objetos Job) y persistimos en segundo plano.
+  const reorder = useCallback(
+    (ids: number[]) => {
+      setJobs((prev) => {
+        const byId = new Map(prev.map((j) => [j.id, j]))
+        return ids.map((id) => byId.get(id)).filter((j): j is Job => Boolean(j))
+      })
+      api.reorderJobs(ids).catch(() => reload())
+    },
+    [reload],
+  )
+
+  const onChangeStatus = useCallback(
+    (id: number, v: string) => api.updateJob(id, { status: v }).then(reload),
+    [reload],
+  )
+  const onToggleStar = useCallback(
+    (id: number, v: boolean) => api.updateJob(id, { starred: v }).then(reload),
+    [reload],
+  )
+
   useEffect(() => {
     let active = true
     api.listJobs().then((data) => {
@@ -33,16 +57,19 @@ export default function JobsPage() {
     }
   }, [])
 
-  const rows: EntityRow[] = jobs.map((j) => ({
-    id: j.id,
-    company: j.company,
-    secondary: j.role,
-    status: j.status,
-    priority: j.priority,
-    starred: j.starred,
-    next_action: j.next_action,
-    next_action_note: j.next_action_note,
-  }))
+  const rows: EntityRow[] = useMemo(
+    () =>
+      jobs.map((j) => ({
+        id: j.id,
+        company: j.company,
+        secondary: j.role,
+        status: j.status,
+        starred: j.starred,
+        next_action: j.next_action,
+        next_action_note: j.next_action_note,
+      })),
+    [jobs],
+  )
   const todayCount = jobs.filter((j) => isToday(j.next_action)).length
 
   return (
@@ -61,9 +88,9 @@ export default function JobsPage() {
           rows={rows}
           statusDefs={JOB_STATUSES}
           onSelect={setSelectedId}
-          onChangeStatus={(id, v) => api.updateJob(id, { status: v }).then(reload)}
-          onChangePriority={(id, v) => api.updateJob(id, { priority: v }).then(reload)}
-          onToggleStar={(id, v) => api.updateJob(id, { starred: v }).then(reload)}
+          onChangeStatus={onChangeStatus}
+          onToggleStar={onToggleStar}
+          onReorder={reorder}
         />
       )}
       <DetailModal

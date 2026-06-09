@@ -16,7 +16,6 @@ export function parseLeadMarkdown(raw: string, filename: string): LeadInput {
     pipeline_status: (data.pipeline_status as string) || 'prospect',
     vertical: (data.vertical as string) ?? null,
     channel: (data.channel as string) ?? null,
-    priority: typeof data.priority === 'number' ? data.priority : 5,
     starred: data.starred === true,
     first_contact: normalizeDate(data.first_contact),
     last_action: normalizeDate(data.last_action),

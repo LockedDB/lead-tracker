@@ -6,8 +6,8 @@ export type Lead = {
   pipeline_status: string
   vertical: string | null
   channel: string | null
-  priority: number
   starred: boolean
+  sort_order: number
   first_contact: string | null
   last_action: string | null
   next_action: string | null
@@ -26,8 +26,8 @@ export type LeadInput = Partial<Omit<Lead, 'id' | 'created_at' | 'updated_at'>> 
 }
 
 const COLUMNS = [
-  'company', 'pipeline_status', 'vertical', 'channel', 'priority', 'starred',
-  'first_contact', 'last_action', 'next_action', 'next_action_note',
+  'company', 'pipeline_status', 'vertical', 'channel', 'starred',
+  'sort_order', 'first_contact', 'last_action', 'next_action', 'next_action_note',
   'contact_name', 'contact_role', 'linkedin_url', 'app_user_axis', 'notes',
 ] as const
 
@@ -65,9 +65,20 @@ export function getLead(db: Database.Database, id: number): Lead | undefined {
 
 export function listLeads(db: Database.Database): Lead[] {
   const rows = db
-    .prepare('SELECT * FROM leads ORDER BY priority DESC, company ASC')
+    .prepare('SELECT * FROM leads ORDER BY sort_order ASC, company ASC')
     .all() as Record<string, unknown>[]
   return rows.map((r) => hydrate(r)!) as Lead[]
+}
+
+// Reasigna sort_order = posición a la lista de ids recibida (orden global completo
+// que manda el cliente tras un drag). El agrupado por estado se hace en el cliente,
+// así que aquí solo persistimos la secuencia.
+export function reorderLeads(db: Database.Database, ids: number[]): void {
+  const upd = db.prepare('UPDATE leads SET sort_order = ? WHERE id = ?')
+  const apply = db.transaction((list: number[]) => {
+    list.forEach((id, i) => upd.run(i, id))
+  })
+  apply(ids)
 }
 
 export function updateLead(

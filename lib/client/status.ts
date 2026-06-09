@@ -29,11 +29,19 @@ export const JOB_STATUSES: StatusDef[] = [
   { value: 'screening', label: 'Screening', tone: 'teal' },
   { value: 'interview', label: 'Entrevista', tone: 'violet' },
   { value: 'offer', label: 'Oferta', tone: 'amber' },
-  { value: 'rejected', label: 'Rechazado', tone: 'rose' },
   { value: 'accepted', label: 'Aceptado', tone: 'emerald' },
+  { value: 'rejected', label: 'Rechazado', tone: 'rose' },
   { value: 'withdrawn', label: 'Retirado', tone: 'zinc' },
 ]
 
 export function statusLabel(defs: StatusDef[], value: string): string {
   return defs.find((d) => d.value === value)?.label ?? value
+}
+
+// Rank de un estado = su índice en el array de definiciones (orden de embudo).
+// Los estados desconocidos van al final. Es la única fuente de verdad del orden
+// por estado: la tabla agrupa y ordena con esto, no hay rank duplicado en SQL.
+export function statusRank(defs: StatusDef[], value: string): number {
+  const i = defs.findIndex((d) => d.value === value)
+  return i === -1 ? defs.length : i
 }

@@ -7,7 +7,6 @@ razon_social: Activate Personal Training Barcelona
 pipeline_status: prospect
 vertical: fitness
 channel: instagram
-priority: 7
 starred: false
 last_action: 2026-05-15
 next_action_note: research pendiente
@@ -29,7 +28,6 @@ describe('parseLeadMarkdown', () => {
     expect(lead.pipeline_status).toBe('prospect')
     expect(lead.vertical).toBe('fitness')
     expect(lead.channel).toBe('instagram')
-    expect(lead.priority).toBe(7)
     expect(lead.starred).toBe(false)
     expect(lead.app_user_axis).toBe('b2c')
     expect(lead.notes).toContain('Track: greenfield')

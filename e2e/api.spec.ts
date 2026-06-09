@@ -24,7 +24,7 @@ test('GET /api/templates returns the 2 seed templates', async ({ request }) => {
 
 test('leads CRUD lifecycle', async ({ request }) => {
   const createRes = await request.post('/api/leads', {
-    data: { company: 'PlaywrightCo', priority: 7, starred: true },
+    data: { company: 'PlaywrightCo', starred: true },
   })
   expect(createRes.status()).toBe(201)
   const { id } = await createRes.json()

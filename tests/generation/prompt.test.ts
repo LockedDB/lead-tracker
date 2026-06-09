@@ -5,7 +5,7 @@ describe('buildPrompt', () => {
   it('incluye plantilla, contexto, instrucciones extra y reglas', () => {
     const prompt = buildPrompt({
       kind: 'outreach_email',
-      subject: { subjectType: 'lead', fields: { company: 'Lyfta', priority: 9 } },
+      subject: { subjectType: 'lead', fields: { company: 'Lyfta', vertical: 'fitness' } },
       template: 'Escribe a {{company}}',
       extraInstructions: 'más corto',
       rules: 'NO em dashes',

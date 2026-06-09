@@ -15,4 +15,27 @@ describe('migrate', () => {
     expect(names).toContain('templates')
     expect(names).toContain('generations')
   })
+
+  it('backfilla sort_order en una DB preexistente sin la columna', () => {
+    const db = getDb(':memory:')
+    db.exec('CREATE TABLE leads (id INTEGER PRIMARY KEY AUTOINCREMENT, company TEXT NOT NULL)')
+    db.prepare('INSERT INTO leads (company) VALUES (?)').run('Banana')
+    db.prepare('INSERT INTO leads (company) VALUES (?)').run('Ananas')
+    migrate(db)
+    const rows = db
+      .prepare('SELECT company, sort_order FROM leads ORDER BY sort_order ASC')
+      .all() as { company: string; sort_order: number }[]
+    expect(rows.map((r) => r.company)).toEqual(['Ananas', 'Banana'])
+    expect(rows.map((r) => r.sort_order)).toEqual([0, 1])
+  })
+
+  it('elimina la columna priority en una DB preexistente', () => {
+    const db = getDb(':memory:')
+    db.exec(
+      'CREATE TABLE leads (id INTEGER PRIMARY KEY AUTOINCREMENT, company TEXT NOT NULL, priority INTEGER NOT NULL DEFAULT 5)',
+    )
+    migrate(db)
+    const cols = db.prepare('PRAGMA table_info(leads)').all() as { name: string }[]
+    expect(cols.some((c) => c.name === 'priority')).toBe(false)
+  })
 })

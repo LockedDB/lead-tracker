@@ -45,12 +45,7 @@ function seedForm(record: Subject, fields: FieldDef[]): Form {
 function blankForm(fields: FieldDef[]): Form {
   const form: Form = { company: '' }
   for (const f of fields) {
-    form[f.key] =
-      f.type === 'select' && f.required
-        ? f.options![0].value
-        : f.key === 'priority'
-          ? '5'
-          : ''
+    form[f.key] = f.type === 'select' && f.required ? f.options![0].value : ''
   }
   return form
 }

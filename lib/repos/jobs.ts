@@ -9,8 +9,8 @@ export type Job = {
   salary_range: string | null
   job_url: string | null
   source: string | null
-  priority: number
   starred: boolean
+  sort_order: number
   applied_date: string | null
   last_action: string | null
   next_action: string | null
@@ -28,7 +28,7 @@ export type JobInput = Partial<Omit<Job, 'id' | 'created_at' | 'updated_at'>> & 
 
 const COLUMNS = [
   'company', 'role', 'status', 'location', 'salary_range', 'job_url', 'source',
-  'priority', 'starred', 'applied_date', 'last_action', 'next_action',
+  'starred', 'sort_order', 'applied_date', 'last_action', 'next_action',
   'next_action_note', 'contact_name', 'contact_role', 'notes',
 ] as const
 
@@ -65,9 +65,18 @@ export function getJob(db: Database.Database, id: number): Job | undefined {
 
 export function listJobs(db: Database.Database): Job[] {
   const rows = db
-    .prepare('SELECT * FROM jobs ORDER BY priority DESC, company ASC')
+    .prepare('SELECT * FROM jobs ORDER BY sort_order ASC, company ASC')
     .all() as Record<string, unknown>[]
   return rows.map((r) => hydrate(r)!) as Job[]
+}
+
+// Ver reorderLeads: persiste la secuencia global que manda el cliente tras un drag.
+export function reorderJobs(db: Database.Database, ids: number[]): void {
+  const upd = db.prepare('UPDATE jobs SET sort_order = ? WHERE id = ?')
+  const apply = db.transaction((list: number[]) => {
+    list.forEach((id, i) => upd.run(i, id))
+  })
+  apply(ids)
 }
 
 export function updateJob(

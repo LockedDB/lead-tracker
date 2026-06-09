@@ -83,10 +83,11 @@ lib/import/        ← parseo de notas markdown del vault
 
 ## Las dos pipelines son simétricas
 
-`leads` y `jobs` comparten estructura casi idéntica (status, priority 1-10, starred, next_action, contact, notes…). Las diferencias clave:
+`leads` y `jobs` comparten estructura casi idéntica (status, starred, sort_order, next_action, contact, notes…). Las diferencias clave:
 
 - La columna de estado es `pipeline_status` en leads y `status` en jobs.
-- Estados definidos en `lib/client/status.ts` (`LEAD_STATUSES` / `JOB_STATUSES`), con `tone` para el color del badge.
+- Estados definidos en `lib/client/status.ts` (`LEAD_STATUSES` / `JOB_STATUSES`), con `tone` para el color del badge. El índice en ese array es el rank de orden: la tabla agrupa por estado en ese orden (ver `statusRank`).
+- `sort_order` es el orden manual dentro de cada estado (drag-and-drop). Se reasigna en bloque vía `reorderLeads`/`reorderJobs` con la secuencia global que manda el cliente.
 - Campos del formulario en `lib/client/fields.ts` (`LEAD_FIELDS` / `JOB_FIELDS`), con `pane: 'side' | 'main'` que decide en qué columna del popup se renderiza cada campo.
 
 Cuando toques una pipeline, comprueba si el cambio aplica también a la otra para mantenerlas en paridad.
@@ -95,7 +96,7 @@ Cuando toques una pipeline, comprueba si el cambio aplica también a la otra par
 
 - **Whitelist de columnas**: cada repo (`lib/repos/*.ts`) tiene un array `COLUMNS`; solo esas columnas se escriben. Añadir un campo = tocar `schema.sql` + el tipo + `COLUMNS` + (probablemente) `fields.ts`.
 - **Booleanos como INTEGER 0/1** en SQLite; `hydrate()` los convierte a `boolean` al leer y `toRow()` al escribir. No metas `true`/`false` crudos.
-- **Solo `company` es obligatorio**. El resto sale de DB defaults (`pipeline_status`/`status`, `priority` 5, `starred` 0). El modo "crear" del popup siembra esos defaults para que coincidan.
+- **Solo `company` es obligatorio**. El resto sale de DB defaults (`pipeline_status`/`status`, `starred` 0, `sort_order` 0). El modo "crear" del popup siembra esos defaults para que coincidan.
 - Fechas como `TEXT` ISO. En el form se cortan a `YYYY-MM-DD` (slice 10).
 
 ## Notas de UI / Headless UI

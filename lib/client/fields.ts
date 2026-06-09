@@ -40,7 +40,6 @@ const statusOptions = (defs: { value: string; label: string }[]) =>
 
 export const LEAD_FIELDS: FieldDef[] = [
   { key: 'pipeline_status', label: 'Estado', type: 'select', options: statusOptions(LEAD_STATUSES), required: true },
-  { key: 'priority', label: 'Prioridad', type: 'number' },
   { key: 'vertical', label: 'Vertical', type: 'text' },
   { key: 'channel', label: 'Canal', type: 'select', options: CHANNELS },
   { key: 'first_contact', label: 'Primer contacto', type: 'date' },
@@ -56,7 +55,6 @@ export const LEAD_FIELDS: FieldDef[] = [
 
 export const JOB_FIELDS: FieldDef[] = [
   { key: 'status', label: 'Estado', type: 'select', options: statusOptions(JOB_STATUSES), required: true },
-  { key: 'priority', label: 'Prioridad', type: 'number' },
   { key: 'role', label: 'Rol', type: 'text' },
   { key: 'location', label: 'Ubicación', type: 'text' },
   { key: 'salary_range', label: 'Salario', type: 'text' },

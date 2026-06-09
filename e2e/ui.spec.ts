@@ -19,7 +19,6 @@ test('cambiar a la pestaña Curros', async ({ page }) => {
         company: 'Ejemplo Remote',
         role: 'Senior iOS Engineer',
         status: 'applied',
-        priority: 7,
         next_action_note: 'seguir en 1 semana',
       },
     })

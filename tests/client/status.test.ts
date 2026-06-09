@@ -13,4 +13,8 @@ describe('status maps', () => {
   it('statusLabel devuelve el label legible', () => {
     expect(statusLabel(LEAD_STATUSES, 'replied')).toBe('Respondió')
   })
+  it('en jobs, accepted va por delante de rejected (victoria primero entre terminales)', () => {
+    const values = JOB_STATUSES.map((s) => s.value)
+    expect(values.indexOf('accepted')).toBeLessThan(values.indexOf('rejected'))
+  })
 })
