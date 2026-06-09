@@ -9,10 +9,16 @@ import { api, type Lead } from '@/lib/client/api'
 
 export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([])
+  const [loading, setLoading] = useState(true)
   const [selectedId, setSelectedId] = useState<number | null>(null)
 
   async function reload() {
-    setLeads(await api.listLeads())
+    setLoading(true)
+    try {
+      setLeads(await api.listLeads())
+    } finally {
+      setLoading(false)
+    }
   }
   useEffect(() => {
     reload()
@@ -32,7 +38,11 @@ export default function LeadsPage() {
 
   return (
     <Shell todayCount={todayCount}>
-      <EntityTable rows={rows} statusDefs={LEAD_STATUSES} onSelect={setSelectedId} />
+      {loading ? (
+        <p className="text-sm text-neutral-400">Cargando…</p>
+      ) : (
+        <EntityTable rows={rows} statusDefs={LEAD_STATUSES} onSelect={setSelectedId} />
+      )}
       <DetailDrawer
         subjectType="lead"
         subjectId={selectedId}

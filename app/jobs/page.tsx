@@ -9,10 +9,16 @@ import { api, type Job } from '@/lib/client/api'
 
 export default function JobsPage() {
   const [jobs, setJobs] = useState<Job[]>([])
+  const [loading, setLoading] = useState(true)
   const [selectedId, setSelectedId] = useState<number | null>(null)
 
   async function reload() {
-    setJobs(await api.listJobs())
+    setLoading(true)
+    try {
+      setJobs(await api.listJobs())
+    } finally {
+      setLoading(false)
+    }
   }
   useEffect(() => {
     reload()
@@ -32,7 +38,9 @@ export default function JobsPage() {
 
   return (
     <Shell todayCount={todayCount}>
-      {rows.length === 0 ? (
+      {loading ? (
+        <p className="text-sm text-neutral-400">Cargando…</p>
+      ) : rows.length === 0 ? (
         <p className="text-sm text-neutral-500">
           Aún no hay curros. Se añaden desde la API o se sembrarán más adelante.
         </p>
