@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
 const TABS = [
+  { href: '/', label: 'Hoy' },
   { href: '/leads', label: 'Clientes' },
   { href: '/jobs', label: 'Curros' },
 ]
@@ -27,7 +28,7 @@ export function Shell({
         <span className="text-sm font-semibold tracking-tight">Lead Tracker</span>
         <nav className="bg-muted/50 flex gap-1 rounded-full border p-1">
           {TABS.map((t) => {
-            const active = pathname.startsWith(t.href)
+            const active = t.href === '/' ? pathname === '/' : pathname.startsWith(t.href)
             return (
               <Link
                 key={t.href}
