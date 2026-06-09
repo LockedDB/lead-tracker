@@ -9,7 +9,7 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "import-leads": "tsx scripts/import-leads.ts"
+    "import-leads": "tsx --tsconfig tsconfig.scripts.json scripts/import-leads.ts"
   },
   "dependencies": {
     "better-sqlite3": "^12.10.0",
