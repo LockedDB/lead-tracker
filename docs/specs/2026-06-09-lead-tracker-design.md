@@ -43,7 +43,7 @@ App Next.js única (frontend + API en el mismo proceso) corriendo en localhost.
 
 ```
 Browser (localhost:3000)
-  React + Radix Themes
+  React + Headless UI + Tailwind
   Board clientes · Board curros
         │ fetch
 Next.js API routes
@@ -116,7 +116,8 @@ Importador de una sola vez: lee `leads/*.md`, parsea frontmatter + body (el body
 
 ## Stack
 - Next.js (App Router), React.
-- Radix Themes para UI.
+- Headless UI (componentes accesibles sin estilo: Tabs, Dialog, Transition, Listbox) + Tailwind CSS para la capa visual.
+- Diseño visual hecho a mano con Tailwind sobre la paleta de marca (negro `#111111`, naranja `#FF6B35`, tipografía Inter). El "bonito" no viene de serie: es estilado propio, sobrio y consistente.
 - better-sqlite3.
 - Generación: `claude -p` vía child process, tras la abstracción `TextGenerator`.
 
