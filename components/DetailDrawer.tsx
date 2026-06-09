@@ -36,9 +36,16 @@ export function DetailDrawer({
       setRecord(null)
       return
     }
+    let cancelled = false
+    setRecord(null)
     const load =
       subjectType === 'lead' ? api.getLead(subjectId) : api.getJob(subjectId)
-    load.then((r) => setRecord(r as Subject))
+    load.then((r) => {
+      if (!cancelled) setRecord(r as Subject)
+    })
+    return () => {
+      cancelled = true
+    }
   }, [subjectType, subjectId])
 
   const statusValue =
@@ -78,6 +85,7 @@ export function DetailDrawer({
 
                   <div className="mt-6">
                     <GeneratePanel
+                      key={record.id}
                       subjectType={subjectType}
                       subjectId={record.id}
                       onSaved={onChanged}

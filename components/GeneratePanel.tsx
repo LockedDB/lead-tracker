@@ -107,14 +107,21 @@ export function GeneratePanel({
           <div className="whitespace-pre-wrap">{result}</div>
           <div className="mt-3 flex gap-2">
             <button
-              onClick={() => navigator.clipboard.writeText(result)}
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(result)
+                } catch {
+                  /* clipboard no disponible */
+                }
+              }}
               className="rounded-md border border-neutral-200 px-3 py-1 text-xs"
             >
               Copiar
             </button>
             <button
               onClick={generate}
-              className="rounded-md border border-neutral-200 px-3 py-1 text-xs"
+              disabled={loading}
+              className="rounded-md border border-neutral-200 px-3 py-1 text-xs disabled:opacity-50"
             >
               Regenerar
             </button>
