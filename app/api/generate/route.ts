@@ -9,6 +9,12 @@ import type { GenerationKind } from '@/lib/generation/types'
 
 export async function POST(req: Request) {
   const { subjectType, subjectId, templateId, extraInstructions } = await req.json()
+  if (subjectType !== 'lead' && subjectType !== 'job') {
+    return NextResponse.json({ error: 'subjectType debe ser lead o job' }, { status: 400 })
+  }
+  if (!subjectId || !templateId) {
+    return NextResponse.json({ error: 'subjectId y templateId son obligatorios' }, { status: 400 })
+  }
   const conn = db()
 
   const template = getTemplate(conn, Number(templateId))

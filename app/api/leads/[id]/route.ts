@@ -12,6 +12,9 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const body = await req.json()
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    return NextResponse.json({ error: 'cuerpo inválido' }, { status: 400 })
+  }
   updateLead(db(), Number(id), body)
   return NextResponse.json(getLead(db(), Number(id)))
 }

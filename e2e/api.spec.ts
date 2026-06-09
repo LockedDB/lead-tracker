@@ -71,3 +71,20 @@ test('POST /api/leads without company returns 400', async ({ request }) => {
   const res = await request.post('/api/leads', { data: {} })
   expect(res.status()).toBe(400)
 })
+
+test('PATCH /api/leads with null body returns 400', async ({ request }) => {
+  const listRes = await request.get('/api/leads')
+  expect(listRes.status()).toBe(200)
+  const leads = await listRes.json()
+  const existingId = leads[0].id
+
+  const res = await request.patch(`/api/leads/${existingId}`, { data: null })
+  expect(res.status()).toBe(400)
+})
+
+test('POST /api/generate with invalid subjectType returns 400', async ({ request }) => {
+  const res = await request.post('/api/generate', {
+    data: { subjectType: 'bogus', subjectId: 1, templateId: 1 },
+  })
+  expect(res.status()).toBe(400)
+})
