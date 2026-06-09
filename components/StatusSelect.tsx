@@ -1,5 +1,10 @@
 'use client'
-import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headlessui/react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from '@/components/ui/select'
 import type { StatusDef } from '@/lib/client/status'
 import { StatusBadge } from './StatusBadge'
 
@@ -13,31 +18,21 @@ export function StatusSelect({
   onChange: (value: string) => void
 }) {
   return (
-    <Listbox value={value} onChange={onChange}>
-      <ListboxButton
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger
         onClick={(e) => e.stopPropagation()}
-        className="rounded-full focus:outline-none"
+        className="h-auto w-fit cursor-pointer gap-0 border-0 bg-transparent p-0 shadow-none focus-visible:ring-0 [&>svg]:hidden"
       >
         <StatusBadge defs={defs} value={value} />
-      </ListboxButton>
-      <ListboxOptions
-        anchor="bottom start"
-        transition
-        // el portal de Headless re-parenta el DOM pero los eventos React siguen
-        // burbujeando al <tr onClick>; sin esto, elegir un estado abriría el popup
-        onClick={(e) => e.stopPropagation()}
-        className="z-[60] min-w-44 rounded-lg border border-white/10 bg-neutral-900 p-1 shadow-xl [--anchor-gap:4px] focus:outline-none transition duration-150 ease-out data-[closed]:scale-95 data-[closed]:opacity-0"
-      >
+      </SelectTrigger>
+      {/* el contenido va en un portal; stopPropagation evita que el click llegue al <tr onClick> */}
+      <SelectContent position="popper" onClick={(e) => e.stopPropagation()}>
         {defs.map((d) => (
-          <ListboxOption
-            key={d.value}
-            value={d.value}
-            className="cursor-pointer rounded-md px-3 py-1.5 text-sm text-neutral-300 data-[focus]:bg-white/10 data-[focus]:text-white data-[selected]:text-white"
-          >
+          <SelectItem key={d.value} value={d.value}>
             {d.label}
-          </ListboxOption>
+          </SelectItem>
         ))}
-      </ListboxOptions>
-    </Listbox>
+      </SelectContent>
+    </Select>
   )
 }

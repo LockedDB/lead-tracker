@@ -1,26 +1,37 @@
-export type StatusDef = { value: string; label: string; tone: 'neutral' | 'active' | 'won' | 'lost' }
+export type StatusTone =
+  | 'slate'
+  | 'blue'
+  | 'teal'
+  | 'violet'
+  | 'fuchsia'
+  | 'amber'
+  | 'emerald'
+  | 'rose'
+  | 'zinc'
+
+export type StatusDef = { value: string; label: string; tone: StatusTone }
 
 export const LEAD_STATUSES: StatusDef[] = [
-  { value: 'prospect', label: 'Prospecto', tone: 'neutral' },
-  { value: 'contacted', label: 'Contactado', tone: 'active' },
-  { value: 'replied', label: 'Respondió', tone: 'active' },
-  { value: 'in_conversation', label: 'En conversación', tone: 'active' },
-  { value: 'call_scheduled', label: 'Call agendada', tone: 'active' },
-  { value: 'proposal_sent', label: 'Propuesta enviada', tone: 'active' },
-  { value: 'closed_won', label: 'Ganado', tone: 'won' },
-  { value: 'closed_lost', label: 'Perdido', tone: 'lost' },
-  { value: 'ghosted', label: 'Ghosteado', tone: 'lost' },
+  { value: 'prospect', label: 'Prospecto', tone: 'slate' },
+  { value: 'contacted', label: 'Contactado', tone: 'blue' },
+  { value: 'replied', label: 'Respondió', tone: 'teal' },
+  { value: 'in_conversation', label: 'En conversación', tone: 'violet' },
+  { value: 'call_scheduled', label: 'Call agendada', tone: 'fuchsia' },
+  { value: 'proposal_sent', label: 'Propuesta enviada', tone: 'amber' },
+  { value: 'closed_won', label: 'Ganado', tone: 'emerald' },
+  { value: 'closed_lost', label: 'Perdido', tone: 'rose' },
+  { value: 'ghosted', label: 'Ghosteado', tone: 'zinc' },
 ]
 
 export const JOB_STATUSES: StatusDef[] = [
-  { value: 'saved', label: 'Guardado', tone: 'neutral' },
-  { value: 'applied', label: 'Aplicado', tone: 'active' },
-  { value: 'screening', label: 'Screening', tone: 'active' },
-  { value: 'interview', label: 'Entrevista', tone: 'active' },
-  { value: 'offer', label: 'Oferta', tone: 'won' },
-  { value: 'rejected', label: 'Rechazado', tone: 'lost' },
-  { value: 'accepted', label: 'Aceptado', tone: 'won' },
-  { value: 'withdrawn', label: 'Retirado', tone: 'lost' },
+  { value: 'saved', label: 'Guardado', tone: 'slate' },
+  { value: 'applied', label: 'Aplicado', tone: 'blue' },
+  { value: 'screening', label: 'Screening', tone: 'teal' },
+  { value: 'interview', label: 'Entrevista', tone: 'violet' },
+  { value: 'offer', label: 'Oferta', tone: 'amber' },
+  { value: 'rejected', label: 'Rechazado', tone: 'rose' },
+  { value: 'accepted', label: 'Aceptado', tone: 'emerald' },
+  { value: 'withdrawn', label: 'Retirado', tone: 'zinc' },
 ]
 
 export function statusLabel(defs: StatusDef[], value: string): string {

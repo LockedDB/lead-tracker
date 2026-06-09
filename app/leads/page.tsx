@@ -1,8 +1,10 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { Shell } from '@/components/Shell'
-import { EntityTable, type TableRow } from '@/components/EntityTable'
+import { EntityTable, type EntityRow } from '@/components/EntityTable'
 import { DetailModal } from '@/components/DetailModal'
+import { TableSkeleton } from '@/components/TableSkeleton'
+import { EmptyState } from '@/components/EmptyState'
 import { LEAD_STATUSES } from '@/lib/client/status'
 import { LEAD_FIELDS } from '@/lib/client/fields'
 import { isToday } from '@/lib/client/dates'
@@ -14,20 +16,24 @@ export default function LeadsPage() {
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [creating, setCreating] = useState(false)
 
-  async function load(showLoading = false) {
-    if (showLoading) setLoading(true)
-    try {
-      setLeads(await api.listLeads())
-    } finally {
-      if (showLoading) setLoading(false)
-    }
+  async function load() {
+    setLeads(await api.listLeads())
+    setLoading(false)
   }
   const reload = () => load()
   useEffect(() => {
-    load(true)
+    let active = true
+    api.listLeads().then((data) => {
+      if (!active) return
+      setLeads(data)
+      setLoading(false)
+    })
+    return () => {
+      active = false
+    }
   }, [])
 
-  const rows: TableRow[] = leads.map((l) => ({
+  const rows: EntityRow[] = leads.map((l) => ({
     id: l.id,
     company: l.company,
     secondary: l.vertical,
@@ -42,7 +48,14 @@ export default function LeadsPage() {
   return (
     <Shell todayCount={todayCount} onNew={() => setCreating(true)}>
       {loading ? (
-        <p className="text-sm text-neutral-400">Cargando…</p>
+        <TableSkeleton />
+      ) : rows.length === 0 ? (
+        <EmptyState
+          title="Aún no hay clientes"
+          description="Empieza añadiendo tu primer cliente para hacerle seguimiento."
+          actionLabel="Nuevo cliente"
+          onAction={() => setCreating(true)}
+        />
       ) : (
         <EntityTable
           rows={rows}

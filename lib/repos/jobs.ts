@@ -43,9 +43,10 @@ function toRow(input: Record<string, unknown>): Record<string, unknown> {
   return row
 }
 
-function hydrate(row: any): Job | undefined {
+function hydrate(row: unknown): Job | undefined {
   if (!row) return undefined
-  return { ...row, starred: !!row.starred }
+  const r = row as Record<string, unknown>
+  return { ...r, starred: !!r.starred } as Job
 }
 
 export function createJob(db: Database.Database, input: JobInput): number {
@@ -65,7 +66,7 @@ export function getJob(db: Database.Database, id: number): Job | undefined {
 export function listJobs(db: Database.Database): Job[] {
   const rows = db
     .prepare('SELECT * FROM jobs ORDER BY priority DESC, company ASC')
-    .all() as any[]
+    .all() as Record<string, unknown>[]
   return rows.map((r) => hydrate(r)!) as Job[]
 }
 

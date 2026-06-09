@@ -42,9 +42,10 @@ function toRow(input: Record<string, unknown>): Record<string, unknown> {
   return row
 }
 
-function hydrate(row: any): Lead | undefined {
+function hydrate(row: unknown): Lead | undefined {
   if (!row) return undefined
-  return { ...row, starred: !!row.starred }
+  const r = row as Record<string, unknown>
+  return { ...r, starred: !!r.starred } as Lead
 }
 
 export function createLead(db: Database.Database, input: LeadInput): number {
@@ -65,7 +66,7 @@ export function getLead(db: Database.Database, id: number): Lead | undefined {
 export function listLeads(db: Database.Database): Lead[] {
   const rows = db
     .prepare('SELECT * FROM leads ORDER BY priority DESC, company ASC')
-    .all() as any[]
+    .all() as Record<string, unknown>[]
   return rows.map((r) => hydrate(r)!) as Lead[]
 }
 

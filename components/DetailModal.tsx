@@ -1,10 +1,30 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
+import { Star, MoreHorizontal, X, Files, Trash2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
 import {
-  Dialog, DialogPanel, DialogBackdrop,
-  Menu, MenuButton, MenuItem, MenuItems,
-  Button, Input,
-} from '@headlessui/react'
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { cn } from '@/lib/utils'
 import type { FieldDef } from '@/lib/client/fields'
 import { GeneratePanel } from './GeneratePanel'
 import { FormField } from './FormField'
@@ -59,6 +79,7 @@ export function DetailModal({
   const [starred, setStarred] = useState(false)
   const [initialStarred, setInitialStarred] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   function applyRecord(rec: Subject, key: string) {
     const seeded = seedForm(rec, fields)
@@ -139,6 +160,7 @@ export function DetailModal({
         }
         onChanged()
         onClose()
+        toast.success('Creado')
       } else if (record) {
         const updated =
           subjectType === 'lead'
@@ -146,7 +168,10 @@ export function DetailModal({
             : await api.updateJob(record.id, buildPatch())
         applyRecord(updated as Subject, `${subjectType}:${record.id}`)
         onChanged()
+        toast.success('Cambios guardados')
       }
+    } catch (e) {
+      toast.error('No se pudo guardar', { description: String(e) })
     } finally {
       setSaving(false)
     }
@@ -162,96 +187,103 @@ export function DetailModal({
     }
     onChanged()
     onClose()
+    toast.success('Duplicado')
   }
 
   async function remove() {
     if (!record) return
-    if (!window.confirm(`¿Eliminar "${record.company}"? No se puede deshacer.`)) return
     if (subjectType === 'lead') await api.deleteLead(record.id)
     else await api.deleteJob(record.id)
     onChanged()
     onClose()
+    toast.success(`"${record.company}" eliminado`)
   }
 
   const placeholder =
     subjectType === 'lead' ? 'Nombre del cliente' : 'Nombre del curro'
 
   return (
-    <Dialog open={open} onClose={onClose} className="relative z-50">
-      <DialogBackdrop
-        transition
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition duration-200 ease-out data-[closed]:opacity-0"
-      />
-      <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel
-          transition
-          className="flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-neutral-950 shadow-2xl transition duration-200 ease-out data-[closed]:scale-95 data-[closed]:opacity-0"
-        >
-          {visible && (
+    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose() }}>
+      <DialogContent
+        showCloseButton={false}
+        className="flex max-h-[85vh] w-full max-w-3xl flex-col gap-0 overflow-hidden p-0 sm:max-w-3xl"
+      >
+        <DialogTitle className="sr-only">
+          {creating ? placeholder : (form.company || 'Detalle')}
+        </DialogTitle>
+        <DialogDescription className="sr-only">
+          Editar los datos y generar texto con Claude Code.
+        </DialogDescription>
+        {visible && (
             <>
-              <header className="flex items-center gap-2 border-b border-white/10 px-6 py-4">
+              <header className="flex items-center gap-1 border-b px-6 py-4">
                 <Input
                   autoFocus={creating}
                   value={form.company ?? ''}
                   placeholder={placeholder}
                   onChange={(e) => setForm((f) => ({ ...f, company: e.target.value }))}
-                  className="min-w-0 flex-1 bg-transparent text-xl font-semibold tracking-tight text-white placeholder:text-neutral-600 focus:outline-none"
+                  className="mr-1 min-w-0 flex-1 border-0 bg-transparent px-0 text-xl font-semibold tracking-tight shadow-none focus-visible:ring-0"
                 />
-                <Button
-                  onClick={() => setStarred((s) => !s)}
-                  aria-label={starred ? 'Quitar estrella' : 'Marcar con estrella'}
-                  className={
-                    'rounded-md px-1.5 text-lg transition ' +
-                    (starred ? 'text-accent' : 'text-neutral-600 hover:text-neutral-400')
-                  }
-                >
-                  ★
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setStarred((s) => !s)}
+                      aria-label={starred ? 'Quitar estrella' : 'Marcar con estrella'}
+                      className={starred ? 'text-primary hover:text-primary' : 'text-muted-foreground'}
+                    >
+                      <Star className={cn('size-4', starred && 'fill-current')} />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>{starred ? 'Quitar estrella' : 'Destacar'}</TooltipContent>
+                </Tooltip>
 
                 {!creating && record && (
-                  <Menu>
-                    <MenuButton
-                      aria-label="Acciones"
-                      className="rounded-md px-2 py-1 text-lg leading-none text-neutral-500 transition hover:bg-white/5 hover:text-white data-[open]:bg-white/5 data-[open]:text-white"
-                    >
-                      ⋯
-                    </MenuButton>
-                    <MenuItems
-                      anchor="bottom end"
-                      transition
-                      className="z-[60] min-w-40 rounded-lg border border-white/10 bg-neutral-900 p-1 shadow-xl [--anchor-gap:6px] focus:outline-none transition duration-150 ease-out data-[closed]:scale-95 data-[closed]:opacity-0"
-                    >
-                      <MenuItem>
-                        <button
-                          onClick={duplicate}
-                          className="block w-full rounded-md px-3 py-1.5 text-left text-sm text-neutral-300 data-[focus]:bg-white/10 data-[focus]:text-white"
-                        >
-                          Duplicar
-                        </button>
-                      </MenuItem>
-                      <MenuItem>
-                        <button
-                          onClick={remove}
-                          className="block w-full rounded-md px-3 py-1.5 text-left text-sm text-red-400 data-[focus]:bg-red-500/10 data-[focus]:text-red-300"
-                        >
-                          Eliminar
-                        </button>
-                      </MenuItem>
-                    </MenuItems>
-                  </Menu>
+                  <DropdownMenu>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" aria-label="Acciones" className="text-muted-foreground">
+                            <MoreHorizontal className="size-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                      </TooltipTrigger>
+                      <TooltipContent>Acciones</TooltipContent>
+                    </Tooltip>
+                    <DropdownMenuContent align="end" className="min-w-40">
+                      <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={duplicate}>
+                        <Files className="size-4" />
+                        Duplicar
+                      </DropdownMenuItem>
+                      <DropdownMenuItem variant="destructive" onClick={() => setConfirmOpen(true)}>
+                        <Trash2 className="size-4" />
+                        Eliminar
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 )}
 
-                <Button
-                  onClick={onClose}
-                  aria-label="Cerrar"
-                  className="rounded-md px-1.5 text-neutral-500 transition hover:text-white"
-                >
-                  ✕
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={onClose}
+                      aria-label="Cerrar"
+                      className="text-muted-foreground"
+                    >
+                      <X className="size-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Cerrar</TooltipContent>
+                </Tooltip>
               </header>
 
               <div className="flex flex-1 flex-col overflow-hidden sm:flex-row">
-                <aside className="shrink-0 space-y-3 overflow-y-auto border-b border-white/10 px-5 py-5 sm:w-64 sm:border-b-0 sm:border-r">
+                <aside className="shrink-0 space-y-3 overflow-y-auto border-b px-5 py-5 sm:w-64 sm:border-b-0 sm:border-r">
                   {fields
                     .filter((f) => f.pane !== 'main')
                     .map((f) => (
@@ -284,32 +316,44 @@ export function DetailModal({
                       onSaved={onChanged}
                     />
                   ) : (
-                    <p className="rounded-xl border border-dashed border-white/10 px-4 py-3 text-sm text-neutral-500">
+                    <p className="text-muted-foreground rounded-xl border border-dashed px-4 py-3 text-sm">
                       Guarda el registro para poder generar texto.
                     </p>
                   )}
                 </div>
               </div>
 
-              <footer className="flex items-center justify-end gap-2 border-t border-white/10 px-6 py-4">
-                <Button
-                  onClick={onClose}
-                  className="rounded-lg border border-white/10 px-4 py-2 text-sm text-neutral-300 transition hover:bg-white/5"
-                >
+              <footer className="flex items-center justify-end gap-2 border-t px-6 py-4">
+                <Button variant="outline" onClick={onClose}>
                   Cancelar
                 </Button>
-                <Button
-                  onClick={save}
-                  disabled={!canSave}
-                  className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent/90 data-[disabled]:opacity-50"
-                >
+                <Button onClick={save} disabled={!canSave}>
                   {saving ? 'Guardando…' : creating ? 'Crear' : 'Guardar'}
                 </Button>
               </footer>
             </>
           )}
-        </DialogPanel>
-      </div>
+      </DialogContent>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar “{record?.company}”?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={remove}
+              className="bg-destructive text-white hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   )
 }

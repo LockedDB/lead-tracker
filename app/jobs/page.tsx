@@ -1,8 +1,10 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { Shell } from '@/components/Shell'
-import { EntityTable, type TableRow } from '@/components/EntityTable'
+import { EntityTable, type EntityRow } from '@/components/EntityTable'
 import { DetailModal } from '@/components/DetailModal'
+import { TableSkeleton } from '@/components/TableSkeleton'
+import { EmptyState } from '@/components/EmptyState'
 import { JOB_STATUSES } from '@/lib/client/status'
 import { JOB_FIELDS } from '@/lib/client/fields'
 import { isToday } from '@/lib/client/dates'
@@ -14,20 +16,24 @@ export default function JobsPage() {
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [creating, setCreating] = useState(false)
 
-  async function load(showLoading = false) {
-    if (showLoading) setLoading(true)
-    try {
-      setJobs(await api.listJobs())
-    } finally {
-      if (showLoading) setLoading(false)
-    }
+  async function load() {
+    setJobs(await api.listJobs())
+    setLoading(false)
   }
   const reload = () => load()
   useEffect(() => {
-    load(true)
+    let active = true
+    api.listJobs().then((data) => {
+      if (!active) return
+      setJobs(data)
+      setLoading(false)
+    })
+    return () => {
+      active = false
+    }
   }, [])
 
-  const rows: TableRow[] = jobs.map((j) => ({
+  const rows: EntityRow[] = jobs.map((j) => ({
     id: j.id,
     company: j.company,
     secondary: j.role,
@@ -42,11 +48,14 @@ export default function JobsPage() {
   return (
     <Shell todayCount={todayCount} onNew={() => setCreating(true)}>
       {loading ? (
-        <p className="text-sm text-neutral-400">Cargando…</p>
+        <TableSkeleton />
       ) : rows.length === 0 ? (
-        <p className="text-sm text-neutral-500">
-          Aún no hay curros. Crea uno con “+ Nuevo”.
-        </p>
+        <EmptyState
+          title="Aún no hay curros"
+          description="Añade una oferta para hacerle seguimiento y generar tu cover letter."
+          actionLabel="Nuevo curro"
+          onAction={() => setCreating(true)}
+        />
       ) : (
         <EntityTable
           rows={rows}
