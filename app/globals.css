@@ -1,13 +1,22 @@
 @import "tailwindcss";
 
 @theme {
-  --color-ink: #111111;
   --color-accent: #ff6b35;
   --color-accent-soft: #ffede4;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
-html, body {
-  background: #fafafa;
-  color: var(--color-ink);
+html {
+  color-scheme: dark;
+}
+
+body {
+  color: #ededed;
+  background-color: #000;
+  /* glows muy sutiles en las esquinas, como el reference de Headless UI */
+  background-image:
+    radial-gradient(60rem 60rem at 0% 0%, rgba(56, 189, 248, 0.06), transparent 60%),
+    radial-gradient(50rem 50rem at 100% 0%, rgba(255, 107, 53, 0.05), transparent 55%);
+  background-attachment: fixed;
+  min-height: 100vh;
 }

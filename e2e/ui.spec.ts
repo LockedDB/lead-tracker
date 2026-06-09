@@ -29,11 +29,12 @@ test('cambiar a la pestaña Curros', async ({ page }) => {
   await page.screenshot({ path: 'test-results/jobs-table.png', fullPage: true })
 })
 
-test('abrir el drawer de un lead muestra el botón Generar', async ({ page }) => {
+test('abrir el popup de un lead muestra los campos editables y el botón Generar', async ({ page }) => {
   await page.goto('/leads')
   // primera fila de la tabla
   await page.locator('tbody tr').first().click()
+  await expect(page.getByRole('button', { name: 'Guardar' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Generar' })).toBeVisible()
   await expect(page.getByText('Generar con Claude Code')).toBeVisible()
-  await page.screenshot({ path: 'test-results/lead-drawer.png' })
+  await page.screenshot({ path: 'test-results/lead-popup.png' })
 })

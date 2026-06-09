@@ -2,8 +2,9 @@
 import { useEffect, useState } from 'react'
 import { Shell } from '@/components/Shell'
 import { EntityTable, type TableRow } from '@/components/EntityTable'
-import { DetailDrawer } from '@/components/DetailDrawer'
+import { DetailModal } from '@/components/DetailModal'
 import { LEAD_STATUSES } from '@/lib/client/status'
+import { LEAD_FIELDS } from '@/lib/client/fields'
 import { isToday } from '@/lib/client/dates'
 import { api, type Lead } from '@/lib/client/api'
 
@@ -11,17 +12,19 @@ export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedId, setSelectedId] = useState<number | null>(null)
+  const [creating, setCreating] = useState(false)
 
-  async function reload() {
-    setLoading(true)
+  async function load(showLoading = false) {
+    if (showLoading) setLoading(true)
     try {
       setLeads(await api.listLeads())
     } finally {
-      setLoading(false)
+      if (showLoading) setLoading(false)
     }
   }
+  const reload = () => load()
   useEffect(() => {
-    reload()
+    load(true)
   }, [])
 
   const rows: TableRow[] = leads.map((l) => ({
@@ -37,17 +40,28 @@ export default function LeadsPage() {
   const todayCount = leads.filter((l) => isToday(l.next_action)).length
 
   return (
-    <Shell todayCount={todayCount}>
+    <Shell todayCount={todayCount} onNew={() => setCreating(true)}>
       {loading ? (
         <p className="text-sm text-neutral-400">Cargando…</p>
       ) : (
-        <EntityTable rows={rows} statusDefs={LEAD_STATUSES} onSelect={setSelectedId} />
+        <EntityTable
+          rows={rows}
+          statusDefs={LEAD_STATUSES}
+          onSelect={setSelectedId}
+          onChangeStatus={(id, v) => api.updateLead(id, { pipeline_status: v }).then(reload)}
+          onChangePriority={(id, v) => api.updateLead(id, { priority: v }).then(reload)}
+          onToggleStar={(id, v) => api.updateLead(id, { starred: v }).then(reload)}
+        />
       )}
-      <DetailDrawer
+      <DetailModal
         subjectType="lead"
         subjectId={selectedId}
-        statusDefs={LEAD_STATUSES}
-        onClose={() => setSelectedId(null)}
+        creating={creating}
+        fields={LEAD_FIELDS}
+        onClose={() => {
+          setSelectedId(null)
+          setCreating(false)
+        }}
         onChanged={reload}
       />
     </Shell>

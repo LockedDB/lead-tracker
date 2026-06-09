@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import {
   Listbox, ListboxButton, ListboxOption, ListboxOptions,
   Disclosure, DisclosureButton, DisclosurePanel,
+  Button, Input,
 } from '@headlessui/react'
 import { api, type Template } from '@/lib/client/api'
 
@@ -54,22 +55,27 @@ export function GeneratePanel({
   const selected = templates.find((t) => t.id === templateId)
 
   return (
-    <div className="rounded-xl bg-neutral-50 p-4">
+    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
       <div className="mb-3 text-xs font-semibold uppercase tracking-wide text-neutral-500">
-        ⚡ Generar con Claude Code
+        Generar con Claude Code
       </div>
       <div className="flex items-center gap-2">
         <Listbox value={templateId} onChange={setTemplateId}>
-          <div className="relative flex-1">
-            <ListboxButton className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-left text-sm">
-              {selected?.name ?? 'Sin plantilla'}
+          <div className="flex-1">
+            <ListboxButton className="flex w-full items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-left text-sm text-neutral-200 transition hover:bg-white/10 data-[open]:border-white/20">
+              <span>{selected?.name ?? 'Sin plantilla'}</span>
+              <span aria-hidden className="ml-2 text-neutral-500">▾</span>
             </ListboxButton>
-            <ListboxOptions className="absolute z-10 mt-1 w-full rounded-lg border border-neutral-200 bg-white py-1 text-sm shadow-lg">
+            <ListboxOptions
+              anchor="bottom start"
+              transition
+              className="z-[60] w-[var(--button-width)] rounded-lg border border-white/10 bg-neutral-900 p-1 text-sm shadow-xl [--anchor-gap:4px] focus:outline-none transition duration-150 ease-out data-[closed]:scale-95 data-[closed]:opacity-0"
+            >
               {templates.map((t) => (
                 <ListboxOption
                   key={t.id}
                   value={t.id}
-                  className="cursor-pointer px-3 py-2 data-[focus]:bg-neutral-100"
+                  className="cursor-pointer rounded-md px-3 py-1.5 text-neutral-300 data-[focus]:bg-white/10 data-[focus]:text-white data-[selected]:text-white"
                 >
                   {t.name}
                 </ListboxOption>
@@ -77,36 +83,36 @@ export function GeneratePanel({
             </ListboxOptions>
           </div>
         </Listbox>
-        <button
+        <Button
           onClick={generate}
           disabled={loading || templateId == null}
-          className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+          className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent/90 data-[disabled]:opacity-50"
         >
           {loading ? 'Generando…' : 'Generar'}
-        </button>
+        </Button>
       </div>
 
       <Disclosure>
-        <DisclosureButton className="mt-2 text-xs text-neutral-400 hover:text-neutral-600">
+        <DisclosureButton className="mt-2 text-xs text-neutral-500 transition hover:text-neutral-300">
           + instrucciones extra
         </DisclosureButton>
         <DisclosurePanel>
-          <input
+          <Input
             value={extra}
             onChange={(e) => setExtra(e.target.value)}
             placeholder="p. ej. más corto, menciona su ronda reciente"
-            className="mt-2 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm"
+            className="mt-2 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-neutral-200 placeholder:text-neutral-600 focus:outline-none data-[focus]:border-white/20"
           />
         </DisclosurePanel>
       </Disclosure>
 
-      {error && <div className="mt-3 text-sm text-red-600">{error}</div>}
+      {error && <div className="mt-3 text-sm text-red-400">{error}</div>}
 
       {result && (
-        <div className="mt-3 rounded-lg border border-neutral-200 bg-white p-3 text-sm leading-relaxed text-neutral-800">
+        <div className="mt-3 rounded-lg border border-white/10 bg-white/[0.03] p-3 text-sm leading-relaxed text-neutral-200">
           <div className="whitespace-pre-wrap">{result}</div>
           <div className="mt-3 flex gap-2">
-            <button
+            <Button
               onClick={async () => {
                 try {
                   await navigator.clipboard.writeText(result)
@@ -114,17 +120,17 @@ export function GeneratePanel({
                   /* clipboard no disponible */
                 }
               }}
-              className="rounded-md border border-neutral-200 px-3 py-1 text-xs"
+              className="rounded-md border border-white/10 px-3 py-1 text-xs text-neutral-300 transition hover:bg-white/5"
             >
               Copiar
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={generate}
               disabled={loading}
-              className="rounded-md border border-neutral-200 px-3 py-1 text-xs disabled:opacity-50"
+              className="rounded-md border border-white/10 px-3 py-1 text-xs text-neutral-300 transition hover:bg-white/5 data-[disabled]:opacity-50"
             >
               Regenerar
-            </button>
+            </Button>
           </div>
         </div>
       )}

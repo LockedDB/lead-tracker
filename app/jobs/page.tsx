@@ -2,8 +2,9 @@
 import { useEffect, useState } from 'react'
 import { Shell } from '@/components/Shell'
 import { EntityTable, type TableRow } from '@/components/EntityTable'
-import { DetailDrawer } from '@/components/DetailDrawer'
+import { DetailModal } from '@/components/DetailModal'
 import { JOB_STATUSES } from '@/lib/client/status'
+import { JOB_FIELDS } from '@/lib/client/fields'
 import { isToday } from '@/lib/client/dates'
 import { api, type Job } from '@/lib/client/api'
 
@@ -11,17 +12,19 @@ export default function JobsPage() {
   const [jobs, setJobs] = useState<Job[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedId, setSelectedId] = useState<number | null>(null)
+  const [creating, setCreating] = useState(false)
 
-  async function reload() {
-    setLoading(true)
+  async function load(showLoading = false) {
+    if (showLoading) setLoading(true)
     try {
       setJobs(await api.listJobs())
     } finally {
-      setLoading(false)
+      if (showLoading) setLoading(false)
     }
   }
+  const reload = () => load()
   useEffect(() => {
-    reload()
+    load(true)
   }, [])
 
   const rows: TableRow[] = jobs.map((j) => ({
@@ -37,21 +40,32 @@ export default function JobsPage() {
   const todayCount = jobs.filter((j) => isToday(j.next_action)).length
 
   return (
-    <Shell todayCount={todayCount}>
+    <Shell todayCount={todayCount} onNew={() => setCreating(true)}>
       {loading ? (
         <p className="text-sm text-neutral-400">Cargando…</p>
       ) : rows.length === 0 ? (
         <p className="text-sm text-neutral-500">
-          Aún no hay curros. Se añaden desde la API o se sembrarán más adelante.
+          Aún no hay curros. Crea uno con “+ Nuevo”.
         </p>
       ) : (
-        <EntityTable rows={rows} statusDefs={JOB_STATUSES} onSelect={setSelectedId} />
+        <EntityTable
+          rows={rows}
+          statusDefs={JOB_STATUSES}
+          onSelect={setSelectedId}
+          onChangeStatus={(id, v) => api.updateJob(id, { status: v }).then(reload)}
+          onChangePriority={(id, v) => api.updateJob(id, { priority: v }).then(reload)}
+          onToggleStar={(id, v) => api.updateJob(id, { starred: v }).then(reload)}
+        />
       )}
-      <DetailDrawer
+      <DetailModal
         subjectType="job"
         subjectId={selectedId}
-        statusDefs={JOB_STATUSES}
-        onClose={() => setSelectedId(null)}
+        creating={creating}
+        fields={JOB_FIELDS}
+        onClose={() => {
+          setSelectedId(null)
+          setCreating(false)
+        }}
         onChanged={reload}
       />
     </Shell>

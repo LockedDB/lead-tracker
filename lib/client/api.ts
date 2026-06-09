@@ -23,6 +23,8 @@ export const api = {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(input),
     }).then(json<{ id: number }>),
+  deleteLead: (id: number) =>
+    fetch(`/api/leads/${id}`, { method: 'DELETE' }).then(json<{ ok: boolean }>),
 
   listJobs: () => fetch('/api/jobs').then(json<Job[]>),
   getJob: (id: number) => fetch(`/api/jobs/${id}`).then(json<Job>),
@@ -38,6 +40,8 @@ export const api = {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(input),
     }).then(json<{ id: number }>),
+  deleteJob: (id: number) =>
+    fetch(`/api/jobs/${id}`, { method: 'DELETE' }).then(json<{ ok: boolean }>),
 
   listTemplates: () => fetch('/api/templates').then(json<Template[]>),
 
