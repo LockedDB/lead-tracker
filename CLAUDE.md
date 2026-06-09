@@ -31,7 +31,7 @@ Hay un MCP **`outlook`** (solo lectura) conectado a la cuenta personal del dueñ
 ## Comandos
 
 ```bash
-npm run dev            # servidor de desarrollo (localhost:3000)
+npm run dev -- -p 3001 # servidor de desarrollo en localhost:3001 (ver "Siempre-arriba" abajo: el 3000 está ocupado)
 npm run build          # build de producción
 npm run lint           # eslint
 npm run test           # vitest (unit) — corre en CI mental antes de dar nada por bueno
@@ -39,6 +39,26 @@ npm run e2e            # playwright (la generación con claude -p va gated)
 npm run e2e:generate   # e2e incluyendo el test de generación real (RUN_GENERATE=1)
 npm run import-leads   # importa leads del vault a SQLite
 ```
+
+## Siempre-arriba (LaunchAgent) — importante para desarrollar
+
+La app corre **permanentemente en `localhost:3000`** vía un **LaunchAgent de macOS** (vive fuera del repo, en `~/Library/LaunchAgents/com.danielbenet.lead-tracker.plist`). Sirve el build de **producción** con `next start` (`RunAtLoad` + `KeepAlive`), así que el puerto **3000 está ocupado de forma estable** y **no tiene hot reload**.
+
+Consecuencias al trabajar en este repo:
+
+- **Para desarrollar con hot reload, usa el puerto 3001** (el 3000 es la instancia estable de producción):
+  ```bash
+  npm run dev -- -p 3001     # → localhost:3001, refleja cambios al guardar
+  ```
+  No lances `npm run dev` sin `-p`: chocaría con el 3000 (o Next se iría solo al 3001 y te liarías sobre qué instancia miras).
+
+- **Para que los cambios lleguen a la instancia de producción (3000)**, hay que reconstruir y reiniciar el servicio (no hay hot reload ahí):
+  ```bash
+  npm run build && launchctl kickstart -k gui/$(id -u)/com.danielbenet.lead-tracker
+  ```
+
+- Logs del servicio: `~/Library/Logs/lead-tracker.{log,err}`. Estado: `launchctl list | grep lead-tracker` (col. 1 = PID, col. 2 = último exit code).
+- Ambas instancias comparten la **misma DB** (`lead-tracker.db` en la raíz), así que cuidado: lo que crees en dev (3001) lo verás en prod (3000) y viceversa.
 
 ## Variables de entorno
 
