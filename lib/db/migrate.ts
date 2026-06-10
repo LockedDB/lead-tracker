@@ -9,6 +9,8 @@ export function migrate(db: Database.Database): void {
   ensureSortOrder(db, 'jobs')
   dropColumn(db, 'leads', 'priority')
   dropColumn(db, 'jobs', 'priority')
+  addColumnIfMissing(db, 'leads', 'about', 'TEXT')
+  addColumnIfMissing(db, 'jobs', 'about', 'TEXT')
 }
 
 function hasColumn(db: Database.Database, table: string, column: string): boolean {
@@ -35,4 +37,16 @@ function ensureSortOrder(db: Database.Database, table: string): void {
 function dropColumn(db: Database.Database, table: string, column: string): void {
   if (!hasColumn(db, table, column)) return
   db.exec(`ALTER TABLE ${table} DROP COLUMN ${column}`)
+}
+
+// schema.sql es CREATE TABLE IF NOT EXISTS: no añade columnas a tablas ya creadas.
+// Para DBs preexistentes hay que añadir las nuevas columnas a mano.
+function addColumnIfMissing(
+  db: Database.Database,
+  table: string,
+  column: string,
+  type: string
+): void {
+  if (hasColumn(db, table, column)) return
+  db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${type}`)
 }

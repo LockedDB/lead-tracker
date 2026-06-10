@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS leads (
   contact_role TEXT,
   linkedin_url TEXT,
   app_user_axis TEXT,
+  about TEXT,
   notes TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -36,6 +37,7 @@ CREATE TABLE IF NOT EXISTS jobs (
   next_action_note TEXT,
   contact_name TEXT,
   contact_role TEXT,
+  about TEXT,
   notes TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))

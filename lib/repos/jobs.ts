@@ -17,6 +17,7 @@ export type Job = {
   next_action_note: string | null
   contact_name: string | null
   contact_role: string | null
+  about: string | null
   notes: string | null
   created_at: string
   updated_at: string
@@ -29,7 +30,7 @@ export type JobInput = Partial<Omit<Job, 'id' | 'created_at' | 'updated_at'>> & 
 const COLUMNS = [
   'company', 'role', 'status', 'location', 'salary_range', 'job_url', 'source',
   'starred', 'sort_order', 'applied_date', 'last_action', 'next_action',
-  'next_action_note', 'contact_name', 'contact_role', 'notes',
+  'next_action_note', 'contact_name', 'contact_role', 'about', 'notes',
 ] as const
 
 function toRow(input: Record<string, unknown>): Record<string, unknown> {

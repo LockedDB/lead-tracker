@@ -16,6 +16,7 @@ export type Lead = {
   contact_role: string | null
   linkedin_url: string | null
   app_user_axis: string | null
+  about: string | null
   notes: string | null
   created_at: string
   updated_at: string
@@ -28,7 +29,7 @@ export type LeadInput = Partial<Omit<Lead, 'id' | 'created_at' | 'updated_at'>> 
 const COLUMNS = [
   'company', 'pipeline_status', 'vertical', 'channel', 'starred',
   'sort_order', 'first_contact', 'last_action', 'next_action', 'next_action_note',
-  'contact_name', 'contact_role', 'linkedin_url', 'app_user_axis', 'notes',
+  'contact_name', 'contact_role', 'linkedin_url', 'app_user_axis', 'about', 'notes',
 ] as const
 
 function toRow(input: Record<string, unknown>): Record<string, unknown> {

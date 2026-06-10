@@ -50,6 +50,7 @@ export const LEAD_FIELDS: FieldDef[] = [
   { key: 'contact_role', label: 'Rol del contacto', type: 'text' },
   { key: 'linkedin_url', label: 'LinkedIn URL', type: 'text' },
   { key: 'next_action_note', label: 'Nota de próxima acción', type: 'text', pane: 'main' },
+  { key: 'about', label: 'Sobre la empresa', type: 'textarea', pane: 'main' },
   { key: 'notes', label: 'Notas', type: 'textarea', pane: 'main' },
 ]
 
@@ -66,5 +67,6 @@ export const JOB_FIELDS: FieldDef[] = [
   { key: 'contact_role', label: 'Rol del contacto', type: 'text' },
   { key: 'job_url', label: 'URL de la oferta', type: 'text' },
   { key: 'next_action_note', label: 'Nota de próxima acción', type: 'text', pane: 'main' },
+  { key: 'about', label: 'Sobre la empresa', type: 'textarea', pane: 'main' },
   { key: 'notes', label: 'Notas', type: 'textarea', pane: 'main' },
 ]
