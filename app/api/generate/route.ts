@@ -24,23 +24,28 @@ export async function POST(req: Request) {
     subjectType === 'lead' ? getLead(conn, Number(subjectId)) : getJob(conn, Number(subjectId))
   if (!record) return NextResponse.json({ error: 'registro no encontrado' }, { status: 404 })
 
-  const generator = createGenerator()
-  const result = await generator.generate({
-    kind: template.kind as GenerationKind,
-    subject: { subjectType, fields: record as Record<string, unknown> },
-    template: template.body,
-    extraInstructions,
-    rules: process.env.STYLE_RULES,
-  })
+  try {
+    const generator = createGenerator()
+    const result = await generator.generate({
+      kind: template.kind as GenerationKind,
+      subject: { subjectType, fields: record as Record<string, unknown> },
+      template: template.body,
+      extraInstructions,
+      rules: process.env.STYLE_RULES,
+    })
 
-  const id = saveGeneration(conn, {
-    subject_type: subjectType,
-    subject_id: Number(subjectId),
-    kind: template.kind as GenerationKind,
-    content: result.content,
-    template_used: template.name,
-    generator: result.generator,
-  })
+    const id = saveGeneration(conn, {
+      subject_type: subjectType,
+      subject_id: Number(subjectId),
+      kind: template.kind as GenerationKind,
+      content: result.content,
+      template_used: template.name,
+      generator: result.generator,
+    })
 
-  return NextResponse.json({ id, content: result.content, generator: result.generator })
+    return NextResponse.json({ id, content: result.content, generator: result.generator })
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e)
+    return NextResponse.json({ error: `fallo al generar: ${message}` }, { status: 500 })
+  }
 }
